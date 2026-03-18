@@ -201,7 +201,7 @@ export default function App() {
         ? lp.offerStack.map((item: any) => `📦 ${item.item} (Senilai ${formatRupiah(item.value)})`).join('\n')
         : '';
     const priceText = selectedPriceTier 
-        ? `\n💰 TOTAL VALUE: ${formatRupiah(lp.totalValue || 0)}\n🔥 HARGA SPESIAL HARI INI: ${formatRupiah(selectedPriceTier.price)}`
+        ? `\n${lp.totalValueIntro || 'TOTAL VALUE'}: ${formatRupiah(lp.totalValue || 0)}\n\n${lp.priceRelief || ''}\n\n🔥 ${lp.priceCallout || 'Hanya'}: ${formatRupiah(selectedPriceTier.price)}`
         : '';
 
     const textToCopy = `
@@ -213,6 +213,8 @@ ${lp.subheadline}
 
 BODY COPY:
 ${lp.body}
+
+${lp.lossCalculation ? `--- KERUGIAN JIKA TIDAK BERTINDAK ---\n${lp.lossCalculation}\n` : ''}
 
 ${lp.benefitsIntro || ''}
 ${lp.benefits ? lp.benefits.map((b: string) => `✅ ${b}`).join('\n') : ''}
@@ -521,9 +523,13 @@ ${creative.description}
             "headline": "A hypnotic, direct headline that triggers the reptilian brain (Fear of missing out, survival, or instant status).",
             "subheadline": "Support text that builds extreme urgency and desire.",
             "body": "Short, punchy, to-the-point copy. Use the 'Pain-Agitate-Solve' framework but keep it aggressive and impulsive. Focus on 'Why you need this NOW' rather than just features. Trigger the lizard brain (survival, greed, or status). Max 3-4 short paragraphs.",
+            "lossCalculation": "A list of real losses (financial, time, status) if the problem is NOT solved. Format: 'Mari kita hitung ruginya jika Anda TIDAK pakai [Product Name]: \n* [Loss 1]: Rp [Value]\n* [Loss 2]: Rp [Value]\n* [Loss 3]: [Intangible Loss]'.",
             "benefitsIntro": "A powerful transition sentence connecting the body copy to the benefits list (e.g., 'Inilah alasan mengapa ribuan orang memilih solusi ini sekarang juga:')",
             "benefits": ["Benefit 1", "Benefit 2", "Benefit 3", "Benefit 4", "Benefit 5"],
             "offerIntro": "A high-pressure transition sentence connecting the benefits to the offer stack (e.g., 'Tapi tunggu, Anda tidak hanya mendapatkan solusi di atas. Inilah semua yang akan Anda amankan hari ini:')",
+            "totalValueIntro": "A sentence explaining the total value of the package (e.g., 'Total Nilai Paket [Product Name] + [Number] Bonus di atas adalah: Rp [TotalValue]').",
+            "priceRelief": "A powerful transition sentence that makes the price feel small (e.g., 'Tapi khusus untuk Anda yang ingin kerja cerdas hari ini... ANDA TIDAK PERLU BAYAR SEJUTA. Cukup investasikan sekali jajan kopi mewah.').",
+            "priceCallout": "A powerful, non-gimmicky urgency trigger for the final price that hits the reptilian brain (e.g., 'Hanya Untuk 50 Orang Pertama Yang Berani Berubah Hari Ini', 'Amankan Slot Anda Sebelum Harga Kembali Normal', 'Investasi Sekali Seumur Hidup Untuk Kebebasan Anda')",
             "cta": "Urgent, direct Call to Action (e.g., 'Amankan Akses Sekarang Sebelum Ditutup')",
             "offerStack": [
                 {"item": "Main Product Name", "value": 1500000},
@@ -1063,6 +1069,15 @@ ${creative.description}
                                   </div>
                                 </div>
 
+                                {activeSolution.landingPage.lossCalculation && (
+                                  <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+                                    <span className="text-[10px] font-sans font-bold text-red-400 uppercase tracking-wider mb-2 block">KERUGIAN JIKA TIDAK BERTINDAK</span>
+                                    <div className="whitespace-pre-line text-sm text-red-900 font-medium">
+                                      {activeSolution.landingPage.lossCalculation}
+                                    </div>
+                                  </div>
+                                )}
+
                                 {activeSolution.landingPage.benefitsIntro && (
                                   <p className="text-sm font-bold text-slate-800 italic">
                                     {activeSolution.landingPage.benefitsIntro}
@@ -1103,14 +1118,31 @@ ${creative.description}
                                     ))}
                                   </div>
 
-                                  <div className="text-center space-y-1 pt-4 border-t-2 border-dashed border-yellow-200">
-                                    <p className="text-sm text-slate-500 font-bold uppercase">Total Value</p>
-                                    <p className="text-xl text-slate-400 line-through decoration-red-500 decoration-2 font-bold">{formatRupiah(activeSolution.landingPage.totalValue || 0)}</p>
+                                  <div className="text-center space-y-2 pt-4 border-t-2 border-dashed border-yellow-200">
+                                    {activeSolution.landingPage.totalValueIntro && (
+                                      <p className="text-sm font-bold text-slate-800">
+                                        {activeSolution.landingPage.totalValueIntro}
+                                      </p>
+                                    )}
+
+                                    <p className="text-xl text-slate-400 line-through decoration-red-500 decoration-2 font-bold">
+                                      {formatRupiah(activeSolution.landingPage.totalValue || 0)}
+                                    </p>
                                     
-                                    <div className="my-2"></div>
+                                    <div className="my-3"></div>
+
+                                    {activeSolution.landingPage.priceRelief && (
+                                      <p className="text-sm font-bold text-slate-900 whitespace-pre-line mb-4">
+                                        {activeSolution.landingPage.priceRelief}
+                                      </p>
+                                    )}
                                     
-                                    <p className="text-sm text-green-600 font-bold uppercase animate-pulse">Harga Spesial Hari Ini</p>
-                                    <p className="text-3xl text-green-700 font-extrabold">{selectedPriceTier ? formatRupiah(selectedPriceTier.price) : '...'}</p>
+                                    <p className="text-sm text-green-600 font-bold uppercase animate-pulse">
+                                      {activeSolution.landingPage.priceCallout || 'Hanya'}
+                                    </p>
+                                    <p className="text-4xl text-green-600 font-black tracking-tighter">
+                                      {selectedPriceTier ? formatRupiah(selectedPriceTier.price) : '...'}
+                                    </p>
                                   </div>
                                 </div>
 
