@@ -130,6 +130,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [tempKey, setTempKey] = useState(''); 
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
 
   useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -324,7 +325,15 @@ ${creative.description}
       }
     } catch (error: any) {
       console.error("Image Gen Error:", error);
-      alert(`Gagal generate gambar: ${error.message}`);
+      
+      const errorMessage = error.message?.toLowerCase() || "";
+      const isQuotaError = error.status === 429 || errorMessage.includes('quota') || errorMessage.includes('too many requests');
+
+      if (isQuotaError) {
+        setShowQuotaModal(true);
+      } else {
+        alert(`Gagal generate gambar: ${error.message}`);
+      }
     } finally {
       setIsGeneratingImage(prev => ({ ...prev, [key]: false }));
     }
@@ -680,6 +689,29 @@ ${creative.description}
                 className="w-full bg-red-50 text-red-600 py-2.5 rounded-lg font-bold hover:bg-red-100 transition-colors border border-red-200"
               >
                 Hapus API Key & Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUOTA ERROR MODAL */}
+      {showQuotaModal && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md p-8 shadow-2xl animate-in fade-in zoom-in duration-300 border-t-4 border-red-500">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="bg-red-100 p-4 rounded-full text-red-600">
+                <AlertTriangle size={48} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Quota Exceeded</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Untuk pembuatan gambar wajib menggunakan paid API key, silahkan lihat tutorial cara upgrade API key di modul.
+              </p>
+              <button 
+                onClick={() => setShowQuotaModal(false)}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-bold transition-all shadow-lg"
+              >
+                Tutup
               </button>
             </div>
           </div>
